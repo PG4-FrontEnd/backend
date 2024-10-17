@@ -7,9 +7,9 @@ dotenv.config();
 
 const port = process.env.PORT;
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Typescript + Node.js + Express Server');
-});
+import userRouter from './routes/users';
+
+app.use('/users', userRouter);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at <https://localhost>:${port}`);
