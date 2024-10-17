@@ -1,13 +1,11 @@
 import mariadb from 'mysql2';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { DB_NAME, DB_PASSWORD } from './config';
 
 const connection = mariadb.createConnection({
 	host: 'localhost',
 	user: 'rynthandew',
-	password: process.env.DBPASSWORD,
-	database: process.env.DATABASE,
+	password: DB_PASSWORD,
+	database: DB_NAME,
 	dateStrings: true
 })
 
