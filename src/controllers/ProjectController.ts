@@ -292,7 +292,6 @@ export const getProjectsByUser = async (
 };
 
 // 유저 별 멤버 조회
-// 유저 별 멤버 조회
 export const getMembersByUser = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   const { userId } = req.params;
 
