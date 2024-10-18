@@ -1,22 +1,33 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-
-const app: Express = express();
+import userRouter from './routes/users';
+import issueRouter from './routes/issues';
+import projectRouter from './routes/projects';
 
 dotenv.config();
 
-const port = process.env.PORT;
+const app: Express = express();
+const port = process.env.PORT || 3000;
 
-import userRouter from './routes/users';
-import issueRouter from './routes/issues';
-
-app.use('/users', userRouter);
-app.use('/issues', issueRouter);  
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+// Routes
+app.use('/api/users', userRouter);
+app.use('/api/issues', issueRouter);
+app.use('/api/projects', projectRouter);
+
+// Error handling middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
 app.listen(port, () => {
-  console.log(`[server]: Server is running at https://localhost:${port}`);
+  console.log(`[server]: Server is running at http://localhost:${port}`);
 });
 
 export default app;
