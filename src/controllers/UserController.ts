@@ -24,16 +24,16 @@ const join = (req, res) => {
 							return res.status(StatusCodes.BAD_REQUEST).end(); // BAD REQUEST
 					}
 
-					return res.status(StatusCodes.CREATED).json(results);
+					return res.status(StatusCodes.CREATED).end();
 			}
 	)
 };
 
 const login = (req, res) => {
-	const { email, password } = req.body;
+	const { personalId, password } = req.body;
 
-	let sql = 'SELECT * FROM users WHERE email = ?';
-	conn.query(sql, email,
+	let sql = 'SELECT * FROM users WHERE personal_id = ?';
+	conn.query(sql, personalId,
 			(err, results) => {
 					if (err) {
 							console.log(err);
@@ -48,7 +48,7 @@ const login = (req, res) => {
 					// 디비 비밀번호랑 비교
 					if (loginUser && loginUser.password == hashPassword) {
 
-							return res.status(StatusCodes.OK).json(results);
+							return res.status(StatusCodes.OK).json({ userId : loginUser.id });
 					} else {
 							return res.status(StatusCodes.UNAUTHORIZED).end();
 					}
