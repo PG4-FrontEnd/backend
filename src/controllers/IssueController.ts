@@ -1,7 +1,6 @@
 import conn from '../../config/mariadb';
 import { StatusCodes } from 'http-status-codes';
 
-
 // 이슈 목록 조회
 const getIssueList = (req, res) => {
   const { projectId } = req.params;
