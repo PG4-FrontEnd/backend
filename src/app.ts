@@ -9,11 +9,9 @@ dotenv.config();
 const port = process.env.PORT;
 
 import userRouter from './routes/users';
-import projectRouter from './routes/Projects';
 import issueRouter from './routes/issues';
 
 app.use('/users', userRouter);
-app.use('/projects', projectRouter);
 app.use('/issues', issueRouter);  
 app.use(cors());
 
