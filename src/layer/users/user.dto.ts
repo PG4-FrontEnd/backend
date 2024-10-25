@@ -21,3 +21,11 @@ export class UpdateUserDto {
 	@IsString()
 	password: string;
 }
+
+export class LoginUserDto {
+	@IsEmail()
+	email: string;
+
+	@IsString()
+	password: string;
+}

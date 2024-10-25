@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 
@@ -8,7 +9,7 @@ export class UserController {
 
   // 사용자 생성하기
   @Post('/join')
-  createUser(@Body() user: User): Promise<User> {
+  createUser(@Body() user: CreateUserDto): Promise<User> {
     return this.userService.createUser(user);
   }
 
@@ -28,7 +29,7 @@ export class UserController {
   @Put(':id')
   updateUser(
     @Param('id') id: string,
-    @Body() user: User,
+    @Body() user: UpdateUserDto,
   ): Promise<User> {
     return this.userService.updateUser(id, user);
   }
