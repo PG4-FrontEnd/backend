@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from '../../layer/users/user.entity';
-import { Project } from '../../layer/projects/project.entity';
-import { Issue } from '../../layer/issues/issue.entity';
+import { Project } from '../../layer/projects/entity_p/project.entity';
+import { Issue } from '../../layer/issues/entity_i/issue.entity';
 
 @Module({
   imports: [
