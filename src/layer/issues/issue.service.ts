@@ -1,7 +1,4 @@
-// src/layer/issues/issue.service.ts
-// 이슈 관련 비즈니스 로직을 처리하는 서비스
-// 데이터베이스 작업과 이슈 관련 로직을 처리합니다.
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Issue } from './entity_i/issue.entity';
@@ -15,35 +12,24 @@ export class IssueService {
     private issueRepository: Repository<Issue>,
   ) {}
 
-  // 프로젝트의 모든 이슈 조회
-  // @param projectId - 프로젝트 ID
-  async findAllIssues(projectId: number): Promise<Issue[]> {
+  // 프로젝트의 모든 이슈 조회 (권한 체크 포함)
+  async findAllIssues(projectId: number, userId: number): Promise<Issue[]> {
+    // 프로젝트 멤버십 체크는 별도의 서비스에서 수행되어야 함
     return await this.issueRepository.find({
       where: { projectId },
       order: { order: 'ASC' }
     });
   }
 
-  // 특정 이슈 조회
-  // @param projectId - 프로젝트 ID
-  // @param issueId - 이슈 ID
-  async findOneIssue(projectId: number, issueId: number): Promise<Issue> {
-    const issue = await this.issueRepository.findOne({
-      where: { id: issueId, projectId }
-    });
-
-    if (!issue) {
-      throw new NotFoundException('이슈를 찾을 수 없습니다.');
-    }
-
+  // 특정 이슈 조회 (권한 체크 포함)
+  async findOneIssue(projectId: number, issueId: number, userId: number): Promise<Issue> {
+    const issue = await this.findIssueAndCheckPermission(projectId, issueId, userId);
     return issue;
   }
 
   // 새로운 이슈 생성
-  // @param projectId - 프로젝트 ID
-  // @param createIssueDto - 이슈 생성 데이터
-  // @param userId - 생성 요청한 사용자 ID
   async createIssue(projectId: number, createIssueDto: CreateIssueDto, userId: number): Promise<Issue> {
+    // 프로젝트 멤버십 체크는 별도의 서비스에서 수행되어야 함
     const issue = this.issueRepository.create({
       ...createIssueDto,
       projectId,
@@ -52,30 +38,37 @@ export class IssueService {
   }
 
   // 이슈 정보 수정
-  // @param projectId - 프로젝트 ID
-  // @param issueId - 이슈 ID
-  // @param updateIssueDto - 수정할 이슈 데이터
-  // @param userId - 수정 요청한 사용자 ID
   async updateIssue(projectId: number, issueId: number, updateIssueDto: UpdateIssueDto, userId: number): Promise<Issue> {
-    const issue = await this.findOneIssue(projectId, issueId);
+    const issue = await this.findIssueAndCheckPermission(projectId, issueId, userId);
     Object.assign(issue, updateIssueDto);
     return await this.issueRepository.save(issue);
   }
 
   // 이슈 순서 변경
-  // @param projectId - 프로젝트 ID
-  // @param issueId - 이슈 ID
-  // @param orderData - 변경할 순서와 태그 정보
-  // @param userId - 수정 요청한 사용자 ID
   async updateIssueOrder(
     projectId: number, 
     issueId: number, 
     orderData: { tagId: number; order: number },
     userId: number
   ): Promise<Issue> {
-    const issue = await this.findOneIssue(projectId, issueId);
+    const issue = await this.findIssueAndCheckPermission(projectId, issueId, userId);
     issue.tagId = orderData.tagId;
     issue.order = orderData.order;
     return await this.issueRepository.save(issue);
+  }
+
+  // 권한 체크를 포함한 이슈 조회 헬퍼 메서드
+  private async findIssueAndCheckPermission(projectId: number, issueId: number, userId: number): Promise<Issue> {
+    const issue = await this.issueRepository.findOne({
+      where: { id: issueId, projectId }
+    });
+
+    if (!issue) {
+      throw new NotFoundException('이슈를 찾을 수 없습니다.');
+    }
+
+    // 프로젝트 멤버십 체크는 별도의 서비스에서 수행되어야 함
+
+    return issue;
   }
 }

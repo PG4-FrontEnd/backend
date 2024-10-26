@@ -1,12 +1,10 @@
-// src/layer/projects/project.service.ts
-// 프로젝트 관련 비즈니스 로직을 처리하는 서비스
-// 데이터베이스 작업과 프로젝트 관련 로직을 처리합니다.
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Project } from './entity_p/project.entity';
 import { CreateProjectDto } from './dto_p/create-project.dto';
 import { UpdateProjectDto } from './dto_p/update-project.dto';
+import axios from 'axios';
 
 @Injectable()
 export class ProjectService {
@@ -15,19 +13,14 @@ export class ProjectService {
     private projectRepository: Repository<Project>,
   ) {}
 
-  // 새로운 프로젝트 생성
-  // @param createProjectDto - 프로젝트 생성 데이터
-  // @param userId - 생성 요청한 사용자 ID
   async createProject(createProjectDto: CreateProjectDto, userId: number): Promise<Project> {
     const project = this.projectRepository.create({
       ...createProjectDto,
-      leader: userId.toString(), // 프로젝트 생성자가 리더가 됨
+      leader: userId.toString(),
     });
     return await this.projectRepository.save(project);
   }
 
-  // 모든 프로젝트 조회
-  // @param userId - 조회 요청한 사용자 ID
   async findAllProjects(userId: number): Promise<Project[]> {
     return await this.projectRepository
       .createQueryBuilder('project')
@@ -36,9 +29,6 @@ export class ProjectService {
       .getMany();
   }
 
-  // 프로젝트 검색
-  // @param title - 검색할 프로젝트 제목
-  // @param leader - 검색할 프로젝트 리더
   async searchProjects(title?: string, leader?: string): Promise<Project[]> {
     const queryBuilder = this.projectRepository.createQueryBuilder('project');
     
@@ -53,10 +43,6 @@ export class ProjectService {
     return await queryBuilder.getMany();
   }
 
-  // 프로젝트 수정
-  // @param projectId - 프로젝트 ID
-  // @param updateProjectDto - 수정할 프로젝트 데이터
-  // @param userId - 수정 요청한 사용자 ID
   async updateProject(projectId: number, updateProjectDto: UpdateProjectDto, userId: number): Promise<Project> {
     const project = await this.projectRepository.findOne({
       where: { id: projectId }
@@ -74,9 +60,6 @@ export class ProjectService {
     return await this.projectRepository.save(project);
   }
 
-  // 프로젝트 삭제
-  // @param projectId - 프로젝트 ID
-  // @param userId - 삭제 요청한 사용자 ID
   async deleteProject(projectId: number, userId: number): Promise<void> {
     const project = await this.projectRepository.findOne({
       where: { id: projectId }
@@ -91,5 +74,20 @@ export class ProjectService {
     }
 
     await this.projectRepository.remove(project);
+  }
+
+  // GitHub PR 조회
+  async getProjectPRs(owner: string, repo: string, githubAccessToken: string) {
+    try {
+      const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/pulls`, {
+        headers: {
+          'Authorization': `Bearer ${githubAccessToken}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      throw new UnauthorizedException('GitHub PR 조회에 실패했습니다.');
+    }
   }
 }

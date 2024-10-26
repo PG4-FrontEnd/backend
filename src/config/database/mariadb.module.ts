@@ -19,6 +19,19 @@ import { Issue } from '../../layer/issues/entity_i/issue.entity';
         database: configService.get<string>('DB_DATABASE'),
         entities: [User, Project, Issue],
         synchronize: true,
+        charset: 'utf8mb4',
+        logging: true,
+        connectTimeout: 30000,
+        timezone: '+09:00',
+        cache: {
+          duration: 30000,
+        },
+        extra: {
+          // Remove driver here as it's automatically handled
+          authPlugins: {
+            mysql_native_password: () => () => Promise.resolve(), // Adjust as needed
+          },
+        },
       }),
     }),
   ],
