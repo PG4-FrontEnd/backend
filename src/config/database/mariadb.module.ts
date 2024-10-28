@@ -24,14 +24,8 @@ import { Issue } from '../../layer/issues/entity_i/issue.entity';
         connectTimeout: 30000,
         timezone: '+09:00',
         cache: {
-          duration: 30000,
-        },
-        extra: {
-          // Remove driver here as it's automatically handled
-          authPlugins: {
-            mysql_native_password: () => () => Promise.resolve(), // Adjust as needed
-          },
-        },
+          duration: 30000
+        }
       }),
     }),
   ],
