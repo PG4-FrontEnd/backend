@@ -2,12 +2,13 @@ import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nes
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { AuthGuard } from '../../common/guards/auth.guard';
+import { CreateUserDto } from '../users/user.dto';
 
-@Controller('users')
+@Controller('auth')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('/join')
+  @Post('/register')
   createUser(@Body() user: User): Promise<User> {
     return this.userService.createUser(user);
   }
