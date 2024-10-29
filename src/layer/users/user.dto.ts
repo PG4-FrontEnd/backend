@@ -14,13 +14,22 @@ export class CreateUserDto {
     @IsNotEmpty()
     password!: string;
 
-    created_at: Date = new Date();  
+	@IsString()
+	created_at: Date;
 }
 
 export class UpdateUserDto {
-    @IsString()
-    username!: string;  
+	@IsString()
+	username: string;
 
-    @IsString()
-    password!: string;  
+	@IsString()
+	password: string;
+}
+
+export class LoginUserDto {
+	@IsEmail()
+	email: string;
+
+	@IsString()
+	password: string;
 }
