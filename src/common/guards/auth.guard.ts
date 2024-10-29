@@ -1,30 +1,68 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private configService: ConfigService) {}
+  private readonly logger = new Logger(AuthGuard.name);
+
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization;
+    const authHeader = request.headers.authorization;
+
+    if (!authHeader) {
+      this.logger.warn('Authorization header is missing');
+      throw new UnauthorizedException('인증 헤더가 존재하지 않습니다.');
+    }
+
+    const token = this.extractTokenFromHeader(authHeader);
 
     if (!token) {
-      throw new UnauthorizedException('토큰이 제공되지 않았습니다.');
+      this.logger.warn('Bearer token is missing from authorization header');
+      throw new UnauthorizedException('토큰이 올바른 형식이 아닙니다.');
     }
 
     try {
-      // JWT 토큰 검증 (내부 서비스용)
-      const jwtPayload = await this.jwtService.verifyAsync(token.replace('Bearer ', ''), {
-        secret: this.configService.get<string>('JWT_SECRET') // ConfigService로 변경
-      });
+      const jwtSecret = this.configService.get<string>('JWT_SECRET');
       
+      if (!jwtSecret) {
+        this.logger.error('JWT_SECRET is not configured');
+        throw new Error('JWT 설정이 올바르지 않습니다.');
+      }
+
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: jwtSecret
+      });
+
       // 검증된 사용자 정보를 요청 객체에 추가
-      request.user = jwtPayload;
+      request.user = payload;
+      
       return true;
-    } catch (e) {
-      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.logger.error(`Token verification failed: ${error.message}`);
+        
+        if (error instanceof TokenExpiredError) {
+          throw new UnauthorizedException('토큰이 만료되었습니다.');
+        }
+        
+        if (error instanceof JsonWebTokenError) {
+          throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+        }
+      }
+
+      throw new UnauthorizedException('인증에 실패했습니다.');
     }
+  }
+
+  private extractTokenFromHeader(authHeader: string): string | undefined {
+    const [type, token] = authHeader.split(' ');
+    return type === 'Bearer' ? token : undefined;
   }
 }
