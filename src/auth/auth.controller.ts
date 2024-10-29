@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Request, Response, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpStatus, UseGuards, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto, LoginUserDto } from 'src/layer/users/user.dto';
+import { Request, Response } from 'express'; // express의 Request와 Response 가져오기
 
 @Controller('auth')
 export class AuthController {
@@ -11,14 +12,12 @@ export class AuthController {
     return this.authService.register(userDto);
   }
 
-	@Post('login')
-	async login(@Request() req, @Response() res, @Body() userDto: LoginUserDto) {
-		const jwt = await this.authService.validateUser(userDto)
+  @Post('login')
+  async login(@Req() req: Request, @Res() res: Response, @Body() userDto: LoginUserDto) {
+    const jwt = await this.authService.validateUser(userDto);
 
-		res.setHeader('Authorization', 'Bearer' + jwt.accessToken);
+    res.setHeader('Authorization', 'Bearer ' + jwt.accessToken); // 공백 추가
 
-		return res.json(jwt);
-
-	}
-
+    return res.json(jwt);
+  }
 }

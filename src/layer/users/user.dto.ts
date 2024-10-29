@@ -1,31 +1,36 @@
-import { IsEmail, IsString } from "class-validator";
+
+import { IsEmail, IsString, IsNotEmpty } from "class-validator";
 
 export class CreateUserDto {
-	@IsEmail()
-	email: string;
+    @IsEmail()
+    email!: string;
 
-	@IsString()
-	username: string;
+    @IsString()
+    @IsNotEmpty()
+    username!: string;
 
-	@IsString()
-	password: string;
+    @IsString()
+    @IsNotEmpty()
+    password: string;
 
-	@IsString()
-	created_at: Date;
+	constructor(email: string, password: string) {
+		this.email = email;
+		this.password = password; // 생성자에서 초기화
+	  }
 }
 
 export class UpdateUserDto {
 	@IsString()
-	username: string;
+	username!: string;
 
 	@IsString()
-	password: string;
+	password!: string;
 }
 
 export class LoginUserDto {
 	@IsEmail()
-	email: string;
+	email!: string;
 
 	@IsString()
-	password: string;
+	password!: string;
 }

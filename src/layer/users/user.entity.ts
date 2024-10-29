@@ -6,14 +6,20 @@ export class User {
   id?: number;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column()
-  password: string;
+  password!: string;
 
   @Column()
-  username: string;
+  username!: string;
 
-  @Column({ type: "datetime", default: () => "CURRENT_TIMESTAMP"})
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
   created_at: Date = new Date();
+
+  @Column({ nullable: true })
+  refreshToken?: string;
+
+  @Column({ nullable: true })
+  githubAccessToken?: string;
 }

@@ -1,33 +1,38 @@
-import { Injectable } from '@nestjs/common';
+// src/layer/users/user.service.ts
+import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-
+import axios from 'axios';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User, process.env.DB_DATABASE)
+    @InjectRepository(User)
     private userRepository: Repository<User>,
+    private jwtService: JwtService
   ) {}
 
-  // 사용자 생성하기
   async createUser(user: User): Promise<User> {
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+    user.password = hashedPassword;
     return this.userRepository.save(user);
   }
 
-  // 모든 사용자 가져오기
   findAllUser(): Promise<User[]> {
     return this.userRepository.find();
   }
 
-  // ID로 사용자 찾기 
-  findUser(email: string): Promise<User> {
-    return this.userRepository.findOneBy({ email });
+  async findUser(email: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ email });
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+    return user;
   }
 
-  // 사용자 업데이트하기
   async updateUser(email: string, updateData: Partial<User>): Promise<User> {
     const user = await this.findUser(email);
     if (updateData.password) {
@@ -37,8 +42,146 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  // 사용자 삭제하기
   async deleteUser(id: number): Promise<void> {
-    await this.userRepository.delete(id);
+    const result = await this.userRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+  }
+
+  // 로그인 처리
+  async login(email: string, password: string) {
+    const user = await this.findUser(email);
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('이메일 또는 비밀번호가 잘못되었습니다.');
+    }
+
+    // JWT 토큰 생성 (내부 서비스용)
+    const accessToken = this.jwtService.sign(
+      { id: user.id, email: user.email },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '5h'
+      }
+    );
+
+    // Refresh Token 생성
+    const refreshToken = this.jwtService.sign(
+      { id: user.id, email: user.email },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '28d'
+      }
+    );
+
+    // Refresh Token을 DB에 저장
+    user.refreshToken = refreshToken;
+    await this.userRepository.save(user);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username
+      }
+    };
+  }
+
+  // GitHub OAuth 처리
+  async handleGithubLogin(code: string) {
+    try {
+      // GitHub access token 발급
+      const tokenResponse = await axios.post('https://github.com/login/oauth/access_token', {
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code
+      }, {
+        headers: { Accept: 'application/json' }
+      });
+
+      const { access_token } = tokenResponse.data;
+
+      // GitHub 사용자 정보 조회
+      const userResponse = await axios.get('https://api.github.com/user', {
+        headers: { Authorization: `Bearer ${access_token}` }
+      });
+
+      const githubUser = userResponse.data;
+
+      // 사용자 정보 저장/업데이트
+      let user = await this.userRepository.findOne({ where: { email: githubUser.email } });
+      if (!user) {
+        user = await this.createUser({
+          email: githubUser.email,
+          username: githubUser.login,
+          password: 'github-oauth', // GitHub 로그인은 비밀번호 불필요
+          githubAccessToken: access_token
+        } as User);
+      } else {
+        user.githubAccessToken = access_token;
+        await this.userRepository.save(user);
+      }
+
+      // JWT 토큰 생성 (내부 서비스용)
+      const accessToken = this.jwtService.sign(
+        { id: user.id, email: user.email },
+        {
+          secret: process.env.JWT_SECRET,
+          expiresIn: '5h'
+        }
+      );
+
+      // Refresh Token 생성
+      const refreshToken = this.jwtService.sign(
+        { id: user.id, email: user.email },
+        {
+          secret: process.env.JWT_SECRET,
+          expiresIn: '28d'
+        }
+      );
+
+      // Refresh Token을 DB에 저장
+      user.refreshToken = refreshToken;
+      await this.userRepository.save(user);
+
+      return {
+        accessToken,
+        refreshToken,
+        githubAccessToken: access_token,
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username
+        }
+      };
+    } catch (error) {
+      throw new UnauthorizedException('GitHub 로그인 처리 중 오류가 발생했습니다.');
+    }
+  }
+
+  // Refresh Token으로 새 Access Token 발급
+  async refreshAccessToken(refreshToken: string): Promise<string> {
+    try {
+      const payload = await this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_SECRET
+      });
+      
+      const user = await this.findUser(payload.email);
+      if (!user || user.refreshToken !== refreshToken) {
+        throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
+      }
+
+      return this.jwtService.sign(
+        { id: user.id, email: user.email },
+        { 
+          secret: process.env.JWT_SECRET,
+          expiresIn: '5h' 
+        }
+      );
+    } catch {
+      throw new UnauthorizedException('토큰이 만료되었습니다.');
+    }
   }
 }
