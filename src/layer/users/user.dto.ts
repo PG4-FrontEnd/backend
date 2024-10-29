@@ -3,7 +3,6 @@ import { IsEmail, IsString, IsNotEmpty } from "class-validator";
 
 export class CreateUserDto {
     @IsEmail()
-    @IsNotEmpty()
     email!: string;
 
     @IsString()
@@ -12,24 +11,26 @@ export class CreateUserDto {
 
     @IsString()
     @IsNotEmpty()
-    password!: string;
+    password: string;
 
-	@IsString()
-	created_at: Date;
+	constructor(email: string, password: string) {
+		this.email = email;
+		this.password = password; // 생성자에서 초기화
+	  }
 }
 
 export class UpdateUserDto {
 	@IsString()
-	username: string;
+	username!: string;
 
 	@IsString()
-	password: string;
+	password!: string;
 }
 
 export class LoginUserDto {
 	@IsEmail()
-	email: string;
+	email!: string;
 
 	@IsString()
-	password: string;
+	password!: string;
 }

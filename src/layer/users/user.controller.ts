@@ -3,7 +3,6 @@ import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { AuthGuard } from '../../common/guards/auth.guard';
-import { CreateUserDto } from '../users/user.dto';
 
 @Controller('auth')
 export class UserController {
