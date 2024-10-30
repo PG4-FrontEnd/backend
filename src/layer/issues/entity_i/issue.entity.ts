@@ -15,7 +15,7 @@ export class Issue {
   @Column('text')
   contents!: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({name: 'created_at'})
   createdAt!: Date;
 
   @Column({ type: 'datetime' })
@@ -31,7 +31,7 @@ export class Issue {
   projectId!: number;
 
 
-  @Column() 
+  @Column({name: 'user_id'}) 
   userId!: number;
 
   @ManyToOne(() => Project, project => project.issues)
