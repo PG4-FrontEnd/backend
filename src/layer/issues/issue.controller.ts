@@ -26,7 +26,7 @@ export class IssueController {
   }
 
   // 특정 이슈 상세 조회
-  @Get(':issueId')
+  @Get('/:issueId')
   async findOne(
     @Param('projectId') projectId: string,
     @Param('issueId') issueId: string,
@@ -39,28 +39,28 @@ export class IssueController {
   // 새로운 이슈 생성
   @Post()
   async create(
-    @Param('projectId') projectId: string,
+    @Param('projectId') projectId: number,
     @Body() createIssueDto: CreateIssueDto,
     @Req() req: RequestWithUser
   ) {
     const userId = req.user.id;
-    return this.issueService.createIssue(+projectId, createIssueDto, userId);
+    return this.issueService.createIssue(projectId, createIssueDto, userId);
   }
 
   // 이슈 정보 수정
-  @Put(':issueId')
+  @Put('/:issueId')
   async update(
-    @Param('projectId') projectId: string,
-    @Param('issueId') issueId: string,
+    @Param('projectId') projectId: number,
+    @Param('issueId') issueId: number,
     @Body() updateIssueDto: UpdateIssueDto,
     @Req() req: RequestWithUser
   ) {
     const userId = req.user.id;
-    return this.issueService.updateIssue(+projectId, +issueId, updateIssueDto, userId);
+    return this.issueService.updateIssue(projectId, issueId, updateIssueDto, userId);
   }
 
   // 이슈 순서 변경
-  @Put(':issueId/order')
+  @Put('/:issueId/order')
   async updateOrder(
     @Param('projectId') projectId: string,
     @Param('issueId') issueId: string,
@@ -69,5 +69,17 @@ export class IssueController {
   ) {
     const userId = req.user.id;
     return this.issueService.updateIssueOrder(+projectId, +issueId, orderData, userId);
+  }
+
+  // 이슈 삭제
+  @Delete('/:issueId')
+  async delete(
+    @Param('projectId') projectId: number,
+    @Param('issueId') issueId: number,
+    @Req() req: RequestWithUser
+  ) {
+    const userId = req.user.id;
+    await this.issueService.deleteIssue(projectId, issueId, userId);
+    return { message: '이슈가 삭제되었습니다.' };
   }
 }

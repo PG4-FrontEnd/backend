@@ -14,7 +14,6 @@ export class IssueService {
 
   // 프로젝트의 모든 이슈 조회 (권한 체크 포함)
   async findAllIssues(projectId: number, userId: number): Promise<Issue[]> {
-    // 프로젝트 멤버십 체크는 별도의 서비스에서 수행되어야 함
     return await this.issueRepository.find({
       where: { projectId },
       order: { order: 'ASC' }
@@ -53,9 +52,33 @@ export class IssueService {
     userId: number
   ): Promise<Issue> {
     const issue = await this.findIssueAndCheckPermission(projectId, issueId, userId);
+
+    // 변경하려는 순서에 이미 다른 이슈가 있는지 확인
+    const existingIssueWithOrder = await this.issueRepository.findOne({
+      where: { projectId, order: orderData.order },
+    });
+
+    // 다른 이슈가 동일한 순서를 가진 경우, 순서가 겹치지 않도록 조정
+    if (existingIssueWithOrder && existingIssueWithOrder.id !== issueId) {
+      await this.issueRepository
+        .createQueryBuilder()
+        .update(Issue)
+        .set({ order: () => '`order` + 1' }) // 해당 순서 이후 모든 이슈의 순서를 1씩 증가
+        .where('projectId = :projectId', { projectId })
+        .andWhere('order >= :newOrder', { newOrder: orderData.order })
+        .execute();
+    }
+
+    // 선택한 이슈의 태그 ID 및 순서 업데이트 후 저장
     issue.tagId = orderData.tagId;
     issue.order = orderData.order;
     return await this.issueRepository.save(issue);
+  }
+
+  // 이슈 삭제
+  async deleteIssue(projectId: number, issueId: number, userId: number): Promise<void> {
+    const issue = await this.findIssueAndCheckPermission(projectId, issueId, userId);
+    await this.issueRepository.remove(issue);
   }
 
   // 권한 체크를 포함한 이슈 조회 헬퍼 메서드
