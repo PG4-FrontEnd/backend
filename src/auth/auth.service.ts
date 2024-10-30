@@ -1,22 +1,32 @@
-import { Injectable, HttpException, HttpStatus, UnauthorizedException } from '@nestjs/common';
-import { UserService } from '../layer/users/user.service';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from '../layer/users/user.dto';
-import { User } from '../layer/users/user.entity';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { UserService } from "../layer/users/user.service";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { CreateUserDto } from "../layer/users/user.dto";
+import { User } from "../layer/users/user.entity";
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
   async register(createUserDto: CreateUserDto) {
-    const existingUser = await this.userService.findUser(createUserDto.email).catch(() => null);
-    
+    const existingUser = await this.userService
+      .findUser(createUserDto.email)
+      .catch(() => null);
+
     if (existingUser) {
-      throw new HttpException('이미 가입된 이메일입니다.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        "이미 가입된 이메일입니다.",
+        HttpStatus.BAD_REQUEST
+      );
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -26,14 +36,13 @@ export class AuthService {
         email: createUserDto.email,
         username: createUserDto.username,
         password: hashedPassword,
-        created_at: new Date()
       } as User);
 
       const { password, ...result } = newUser;
       return result;
     } catch (error) {
       throw new HttpException(
-        (error as Error).message || 'Internal Server Error',
+        (error as Error).message || "Internal Server Error",
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
@@ -41,21 +50,21 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const user = await this.userService.findUser(email);
-    
+
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 잘못되었습니다.');
+      throw new UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다.");
     }
 
     const payload = { id: user.id, email: user.email };
-    
+
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET,
-      expiresIn: '5h'
+      expiresIn: "5h",
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET,
-      expiresIn: '28d'
+      expiresIn: "28d",
     });
 
     // DB에 refreshToken 업데이트
@@ -69,8 +78,8 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        username: user.username
-      }
+        username: user.username,
+      },
     };
   }
 
