@@ -33,8 +33,8 @@ async function bootstrap() {
   // 전역 파이프 설정
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
+      whitelist: false,
+      forbidNonWhitelisted: false,
       transform: true,
     }),
   );

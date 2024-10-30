@@ -1,9 +1,9 @@
-// src/layer/users/user.service.ts
 import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import axios from 'axios';
 
@@ -12,7 +12,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private configService: ConfigService
   ) {}
 
   async createUser(user: User): Promise<User> {
@@ -33,11 +34,28 @@ export class UserService {
     return user;
   }
 
+  async findUserById(id: number): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+    return user;
+  }
+
   async updateUser(email: string, updateData: Partial<User>): Promise<User> {
     const user = await this.findUser(email);
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
+    Object.assign(user, updateData);
+    return this.userRepository.save(user);
+  }
+
+  async updateUserId(id: number, updateData: Partial<User>): Promise<User> {
+    const user = await this.findUserById(id);
+    // if (updateData.password) {
+    //   updateData.password = await bcrypt.hash(updateData.password, 10);
+    // }
     Object.assign(user, updateData);
     return this.userRepository.save(user);
   }
@@ -56,11 +74,13 @@ export class UserService {
       throw new UnauthorizedException('이메일 또는 비밀번호가 잘못되었습니다.');
     }
 
+    const jwtSecret = this.configService.get<string>('JWT_SECRET');
+
     // JWT 토큰 생성 (내부 서비스용)
     const accessToken = this.jwtService.sign(
       { id: user.id, email: user.email },
       {
-        secret: process.env.JWT_SECRET,
+        secret: jwtSecret,
         expiresIn: '5h'
       }
     );
@@ -69,7 +89,7 @@ export class UserService {
     const refreshToken = this.jwtService.sign(
       { id: user.id, email: user.email },
       {
-        secret: process.env.JWT_SECRET,
+        secret: jwtSecret,
         expiresIn: '28d'
       }
     );
@@ -94,8 +114,8 @@ export class UserService {
     try {
       // GitHub access token 발급
       const tokenResponse = await axios.post('https://github.com/login/oauth/access_token', {
-        client_id: process.env.GITHUB_CLIENT_ID,
-        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        client_id: this.configService.get<string>('GITHUB_CLIENT_ID'),
+        client_secret: this.configService.get<string>('GITHUB_CLIENT_SECRET'),
         code
       }, {
         headers: { Accept: 'application/json' }
@@ -124,11 +144,13 @@ export class UserService {
         await this.userRepository.save(user);
       }
 
+      const jwtSecret = this.configService.get<string>('JWT_SECRET');
+
       // JWT 토큰 생성 (내부 서비스용)
       const accessToken = this.jwtService.sign(
         { id: user.id, email: user.email },
         {
-          secret: process.env.JWT_SECRET,
+          secret: jwtSecret,
           expiresIn: '5h'
         }
       );
@@ -137,7 +159,7 @@ export class UserService {
       const refreshToken = this.jwtService.sign(
         { id: user.id, email: user.email },
         {
-          secret: process.env.JWT_SECRET,
+          secret: jwtSecret,
           expiresIn: '28d'
         }
       );
@@ -164,8 +186,10 @@ export class UserService {
   // Refresh Token으로 새 Access Token 발급
   async refreshAccessToken(refreshToken: string): Promise<string> {
     try {
+      const jwtSecret = this.configService.get<string>('JWT_SECRET');
+      
       const payload = await this.jwtService.verify(refreshToken, {
-        secret: process.env.JWT_SECRET
+        secret: jwtSecret
       });
       
       const user = await this.findUser(payload.email);
@@ -176,7 +200,7 @@ export class UserService {
       return this.jwtService.sign(
         { id: user.id, email: user.email },
         { 
-          secret: process.env.JWT_SECRET,
+          secret: jwtSecret,
           expiresIn: '5h' 
         }
       );

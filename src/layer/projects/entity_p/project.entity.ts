@@ -1,5 +1,7 @@
+
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
 import { Issue } from '../../issues/entity_i/issue.entity';
+import { ProjectMember } from '../../members/entity_m/entity.member';
 
 @Entity('projects')
 export class Project {
@@ -23,4 +25,7 @@ export class Project {
 
   @OneToMany(() => Issue, issue => issue.project)
   issues!: Issue[];
+
+  @OneToMany(() => ProjectMember, member => member.project)
+  members!: ProjectMember[];
 }

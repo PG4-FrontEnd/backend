@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { UserService } from './user.service';
 import { User } from './user.entity';
@@ -36,16 +36,16 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
-  @Put(':id')
+  @Put('/users/:id')
   updateUser(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() user: UpdateUserDto,
   ): Promise<User> {
-    return this.userService.updateUser(id, user);
+    return this.userService.updateUserId(id, user);
   }
 
   @UseGuards(AuthGuard)
-  @Delete(':id')
+  @Delete('/users/:id')
   deleteUser(@Param('id') id: string): Promise<void> {
     return this.userService.deleteUser(+id);
   }
