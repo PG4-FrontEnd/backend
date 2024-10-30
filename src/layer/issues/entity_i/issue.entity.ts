@@ -30,6 +30,10 @@ export class Issue {
   @Column()
   projectId!: number;
 
+
+  @Column() 
+  userId!: number;
+
   @ManyToOne(() => Project, project => project.issues)
   @JoinColumn({ name: 'projectId' })
   project!: Project;

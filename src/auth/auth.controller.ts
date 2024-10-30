@@ -1,23 +1,24 @@
-import { Controller, Get, Post, Body, HttpStatus, UseGuards, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto, LoginUserDto } from 'src/layer/users/user.dto';
-import { Request, Response } from 'express'; // express의 Request와 Response 가져오기
+import { CreateUserDto, LoginUserDto } from '../layer/users/user.dto';
+import { Response } from 'express';
 
-@Controller('auth')
+@Controller('auth1')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
-  async register(@Body() userDto: CreateUserDto) {
-    return this.authService.register(userDto);
+  @Post('/register')
+  async register(@Body() createUserDto: CreateUserDto) {
+    return await this.authService.register(createUserDto);
   }
 
-  @Post('login')
-  async login(@Req() req: Request, @Res() res: Response, @Body() userDto: LoginUserDto) {
-    const jwt = await this.authService.validateUser(userDto);
-
-    res.setHeader('Authorization', 'Bearer ' + jwt.accessToken); // 공백 추가
-
+  @Post('/login')
+  async login(
+    @Body() loginDto: LoginUserDto,
+    @Res() res: Response
+  ) {
+    const jwt = await this.authService.login(loginDto.email, loginDto.password);
+    res.setHeader('Authorization', 'Bearer ' + jwt.accessToken);
     return res.json(jwt);
   }
 }

@@ -1,54 +1,111 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { UserService } from '../layer/users/user.service';
-import * as bcrypt from 'bcrypt';
-import { CreateUserDto, LoginUserDto } from 'src/layer/users/user.dto';
-import { JwtService } from '@nestjs/jwt';
-import { Payload } from './jwt.payload';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { UserService } from "../layer/users/user.service";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { CreateUserDto } from "../layer/users/user.dto";
+import { User } from "../layer/users/user.entity";
 
 @Injectable()
-export class AuthService { 
+export class AuthService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService,
+    private jwtService: JwtService
   ) {}
 
-  async register(userDto: CreateUserDto) {
-    const user = await this.userService.findUser(userDto.email);
-    if (user) {
+  async register(createUserDto: CreateUserDto) {
+    const existingUser = await this.userService
+      .findUser(createUserDto.email)
+      .catch(() => null);
+
+    if (existingUser) {
       throw new HttpException(
-        '이미 가입된 이메일입니다.',
-        HttpStatus.BAD_REQUEST,
+        "이미 가입된 이메일입니다.",
+        HttpStatus.BAD_REQUEST
       );
     }
 
-    const encryptedPassword = bcrypt.hashSync(userDto.password, 10);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
     try {
       const newUser = await this.userService.createUser({
-        ...userDto,
-        password: encryptedPassword,
-		created_at: new Date(),
-      });
-      const { password, ...userWithoutPassword } = newUser; // password 속성을 제외한 새로운 객체 생성
-    return userWithoutPassword;
+        email: createUserDto.email,
+        username: createUserDto.username,
+        password: hashedPassword,
+      } as User);
+
+      const { password, ...result } = newUser;
+      return result;
     } catch (error) {
-      throw new HttpException((error as Error).message || 'Internal Server Error', 500);
+      throw new HttpException(
+        (error as Error).message || "Internal Server Error",
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
-  async validateUser(userDto: LoginUserDto): Promise<any> {
-    const user = await this.userService.findUser(userDto.email);
-    if (user && user.password && await bcrypt.compare(userDto.password, user.password)) {
-      if (user.id === undefined) {
-        throw new HttpException('User ID is undefined', HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-      
-      const payload: Payload = { id: user.id, email: user.email }; // user.id는 이제 string으로 보장됨
-      const secretKey = process.env.JWT_SECRET_KEY || 'defaultSecret'; // 기본값 설정
-      return {
-        accessToken: this.jwtService.sign(payload, { secret: secretKey }),
-      };
+  async login(email: string, password: string) {
+    const user = await this.userService.findUser(email);
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException("이메일 또는 비밀번호가 잘못되었습니다.");
     }
-    return null;
+
+    const payload = { id: user.id, email: user.email };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: "5h",
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: "28d",
+    });
+
+    // DB에 refreshToken 업데이트
+    await this.userService.updateUser(user.email, {
+      refreshToken: refreshToken
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+      },
+    };
+  }
+
+  // Refresh Token으로 새 Access Token 발급
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      const payload = await this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_SECRET
+      });
+
+      const user = await this.userService.findUser(payload.email);
+      if (!user || user.refreshToken !== refreshToken) {
+        throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
+      }
+
+      const newAccessToken = this.jwtService.sign(
+        { id: user.id, email: user.email },
+        {
+          secret: process.env.JWT_SECRET,
+          expiresIn: '5h'
+        }
+      );
+
+      return { accessToken: newAccessToken };
+    } catch (error) {
+      throw new UnauthorizedException('토큰이 만료되었습니다.');
+    }
   }
 }

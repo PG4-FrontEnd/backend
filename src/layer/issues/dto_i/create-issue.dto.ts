@@ -3,7 +3,7 @@ import { IsString, IsNotEmpty, IsNumber, IsDateString } from 'class-validator';
 export class CreateIssueDto {
   @IsString()
   @IsNotEmpty()
-  title!: string;  // 느낌표(!) 추가
+  title!: string; 
 
   @IsString()
   @IsNotEmpty()
@@ -14,11 +14,17 @@ export class CreateIssueDto {
   contents!: string;
 
   @IsDateString()
-  deadline!: Date;
+  deadline!: string;
 
   @IsNumber()
+  @IsNotEmpty()
   tagId!: number;
 
   @IsNumber()
+  @IsNotEmpty()
   order!: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  userId!: number;
 }
