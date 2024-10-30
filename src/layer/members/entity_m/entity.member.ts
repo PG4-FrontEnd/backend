@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../users/user.entity';
 import { Project } from '../../projects/entity_p/project.entity';
 
-@Entity('project_members')
+@Entity('projectMembers')
 export class ProjectMember {
   @PrimaryColumn()
   userId!: number;

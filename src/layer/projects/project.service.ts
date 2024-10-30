@@ -66,9 +66,9 @@ export class ProjectService {
     try {
       const projects = await this.projectRepository
         .createQueryBuilder('project')
-        .innerJoinAndSelect('project.members', 'member')
+        .innerJoinAndSelect('projectMembers', 'member')
         .where('member.userId = :userId', { userId })
-        .orderBy('project.createdAt', 'DESC')
+        .orderBy('project.created_at', 'DESC')
         .getMany();
 
       this.logger.debug(`Retrieved ${projects.length} projects for user ${userId}`);

@@ -29,11 +29,12 @@ export class IssueService {
 
   // 새로운 이슈 생성
   async createIssue(projectId: number, createIssueDto: CreateIssueDto, userId: number): Promise<Issue> {
-    // 프로젝트 멤버십 체크는 별도의 서비스에서 수행되어야 함
     const issue = this.issueRepository.create({
       ...createIssueDto,
       projectId,
+      userId,
     });
+
     return await this.issueRepository.save(issue);
   }
 

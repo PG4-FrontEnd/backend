@@ -4,15 +4,15 @@ export class CreateUserDto {
     @IsEmail()
     @IsNotEmpty()
     email!: string;
-
+  
     @IsString()
     @IsNotEmpty()
     username!: string;
-
+  
     @IsString()
     @IsNotEmpty()
     password!: string;
-}
+  }
 
 export class LoginUserDto {
     @IsEmail()
@@ -32,4 +32,9 @@ export class UpdateUserDto {
     @IsString()
     @IsOptional()
     password?: string;
+
+    @IsString()
+    @IsOptional()
+    refreshToken?: string;
+
 }

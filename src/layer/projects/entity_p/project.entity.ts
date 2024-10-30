@@ -17,7 +17,7 @@ export class Project {
   @Column()
   repository!: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
   @Column({ type: 'datetime' })

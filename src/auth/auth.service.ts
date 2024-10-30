@@ -67,9 +67,10 @@ export class AuthService {
       expiresIn: "28d",
     });
 
-    // Refresh Token을 DB에 저장
-    user.refreshToken = refreshToken;
-    await this.userService.updateUser(user.email, { refreshToken });
+    // DB에 refreshToken 업데이트
+    await this.userService.updateUser(user.email, {
+      refreshToken: refreshToken
+    });
 
     return {
       accessToken,
@@ -80,5 +81,31 @@ export class AuthService {
         username: user.username,
       },
     };
+  }
+
+  // Refresh Token으로 새 Access Token 발급
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      const payload = await this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_SECRET
+      });
+
+      const user = await this.userService.findUser(payload.email);
+      if (!user || user.refreshToken !== refreshToken) {
+        throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
+      }
+
+      const newAccessToken = this.jwtService.sign(
+        { id: user.id, email: user.email },
+        {
+          secret: process.env.JWT_SECRET,
+          expiresIn: '5h'
+        }
+      );
+
+      return { accessToken: newAccessToken };
+    } catch (error) {
+      throw new UnauthorizedException('토큰이 만료되었습니다.');
+    }
   }
 }
