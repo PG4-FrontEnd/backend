@@ -9,7 +9,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('/register')
-  createUser(@Body() user: User): Promise<User> {
+  createUser(@Body() user: CreateUserDto): Promise<User> {
+    console.log('user: ', user)
     return this.userService.createUser(user);
   }
 
@@ -24,13 +25,13 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
-  @Get()
+  @Get('/users')
   findAll(): Promise<User[]> {
     return this.userService.findAllUser();
   }
 
   @UseGuards(AuthGuard)
-  @Get(':email')
+  @Get('/users/:email')
   findUser(@Param('email') email: string): Promise<User> {
     return this.userService.findUser(email);
   }
