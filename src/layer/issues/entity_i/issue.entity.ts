@@ -18,6 +18,9 @@ export class Issue {
   @CreateDateColumn({name: 'created_at'})
   createdAt!: Date;
 
+  @Column({ type: 'datetime', nullable: true })
+  startDate!: Date;  
+
   @Column({ type: 'datetime' })
   deadline!: Date;
 

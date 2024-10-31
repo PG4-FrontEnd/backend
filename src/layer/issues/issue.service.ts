@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { Issue } from './entity_i/issue.entity';
 import { CreateIssueDto } from './dto_i/create-issue.dto';
 import { UpdateIssueDto } from './dto_i/update-issue.dto';
@@ -12,6 +12,33 @@ export class IssueService {
     private issueRepository: Repository<Issue>,
   ) {}
 
+  // 이슈 검색 기능 추가
+async searchIssues(
+  projectId: number, 
+  searchParams: { 
+    title?: string; 
+    manager?: string;
+    startDate?: Date;
+    tagId?: number;
+  }
+): Promise<Issue[]> {
+  const queryBuilder = this.issueRepository.createQueryBuilder('issue')
+    .where('issue.projectId = :projectId', { projectId });
+
+  if (searchParams.title) {
+    queryBuilder.andWhere('issue.title LIKE :title', { title: `%${searchParams.title}%` });
+  }
+
+  if (searchParams.manager) {
+    queryBuilder.andWhere('issue.manager LIKE :manager', { manager: `%${searchParams.manager}%` });
+  }
+
+  if (searchParams.tagId) {
+    queryBuilder.andWhere('issue.tagId = :tagId', { tagId: searchParams.tagId });
+  }
+
+  return await queryBuilder.orderBy('issue.order', 'ASC').getMany();
+}
   // 프로젝트의 모든 이슈 조회 (권한 체크 포함)
   async findAllIssues(projectId: number, userId: number): Promise<Issue[]> {
     return await this.issueRepository.find({
@@ -92,7 +119,7 @@ export class IssueService {
     }
 
     // 프로젝트 멤버십 체크는 별도의 서비스에서 수행되어야 함
-
+ 
     return issue;
   }
 }

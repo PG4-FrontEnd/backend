@@ -18,6 +18,10 @@ export class UpdateIssueDto {
 
   @IsDateString()
   @IsOptional()
+  startDate?: Date; // 시작일 필드 추가
+
+  @IsDateString()
+  @IsOptional()
   deadline?: Date; // 마감일 (선택)
 
   @IsNumber()
