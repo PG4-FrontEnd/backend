@@ -9,6 +9,7 @@ import { ProjectModule } from './layer/projects/project.module';
 import { IssueModule } from './layer/issues/issue.module';
 import { MemberModule } from './layer/members/member.module';
 import { DatabaseModule } from './config/database/mariadb.module';
+import { AuthModule } from './auth/auth.module'; 
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { DatabaseModule } from './config/database/mariadb.module';
     UsersModule,
     ProjectModule,
     IssueModule,
-    MemberModule
+    MemberModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [

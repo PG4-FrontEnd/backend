@@ -13,12 +13,27 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '5h' },
+        signOptions: {
+          expiresIn: '5h', // Access Token 유효기간
+        }
       }),
     }),
   ],
-  providers: [AuthService],
+  providers: [
+    AuthService,
+    // Refresh Token 설정을 위한 Provider
+    {
+      provide: 'REFRESH_TOKEN_CONFIG',
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_REFRESH_SECRET') || configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: '28d'
+        }
+      }),
+      inject: [ConfigService],
+    }
+  ],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
