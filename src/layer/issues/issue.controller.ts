@@ -22,12 +22,13 @@ export class IssueController {
     @Query('title') title?: string,
     @Query('manager') manager?: string,
     @Query('tagId') tagId?: string,
-    @Query('content') content?: string,
+    @Query('contents') contents?: string,
   ) {
     return this.issueService.searchIssues(projectId, {
       title,
       manager,
       tagId: tagId ? +tagId : undefined,
+      contents,
     });
   }
 
