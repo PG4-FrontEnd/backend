@@ -12,7 +12,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   async createUser(user: User): Promise<User> {
@@ -183,5 +183,34 @@ export class UserService {
     } catch {
       throw new UnauthorizedException('토큰이 만료되었습니다.');
     }
+  }
+
+  async findByEmailOrSave(email: string, username: string, providerId: string): Promise<User> {
+    const foundUser = await this.userRepository.findOneBy({ email })
+    if (foundUser) {
+      return foundUser;
+    }
+
+    const newUser = await this.userRepository.save({
+      email,
+      username,
+      providerId,
+    });
+
+    return newUser;
+  }
+
+  async getAccessToken(user : any){
+    // JWT 토큰 생성 (내부 서비스용)
+    const accessToken = this.jwtService.sign(
+      { id: user.id, email: user.email },
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '5h'
+      }
+    );
+
+    return accessToken;
+
   }
 }

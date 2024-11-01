@@ -1,23 +1,32 @@
 import { Controller, Get, Post, Body, HttpStatus, UseGuards, Req, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto, LoginUserDto } from 'src/layer/users/user.dto';
-import { Request, Response } from 'express'; // express의 Request와 Response 가져오기
+import { Request, Response, urlencoded } from 'express'; // express의 Request와 Response 가져오기
+import { GoogleAuthGuard } from './auth.guard';
+import { UserService } from 'src/layer/users/user.service';
+import { access } from 'fs';
 
-@Controller('auth')
+@Controller('login')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService
+  ) {}
 
-  @Post('register')
-  async register(@Body() userDto: CreateUserDto) {
-    return this.authService.register(userDto);
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuth(@Req() req: Request){}
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const { user } = req;
+    const token = await this.userService.getAccessToken(user)
+    console.log(token);
+
+    return res.json({
+      accessToken : token,
+      user
+    });
   }
 
-  @Post('login')
-  async login(@Req() req: Request, @Res() res: Response, @Body() userDto: LoginUserDto) {
-    const jwt = await this.authService.validateUser(userDto);
-
-    res.setHeader('Authorization', 'Bearer ' + jwt.accessToken); // 공백 추가
-
-    return res.json(jwt);
-  }
 }

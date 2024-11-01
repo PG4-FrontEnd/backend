@@ -4,8 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
-  private readonly logger = new Logger(AuthGuard.name);
+export class LoginGuard implements CanActivate {
+  private readonly logger = new Logger(LoginGuard.name);
 
   constructor(
     private readonly jwtService: JwtService,

@@ -3,12 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthGuard } from './common/guards/auth.guard';
+import { LoginGuard } from './common/guards/auth.guard';
 import { UsersModule } from './layer/users/user.module';
 import { ProjectModule } from './layer/projects/project.module';
 import { IssueModule } from './layer/issues/issue.module';
 import { MemberModule } from './layer/members/member.module';
 import { DatabaseModule } from './config/database/mariadb.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -34,12 +35,13 @@ import { DatabaseModule } from './config/database/mariadb.module';
     UsersModule,
     ProjectModule,
     IssueModule,
-    MemberModule
+    MemberModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    AuthGuard  // AuthGuard는 providers에 포함되어야 합니다
+    LoginGuard  // AuthGuard는 providers에 포함되어야 합니다
   ],
 })
 export class AppModule {}

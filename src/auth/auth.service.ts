@@ -27,7 +27,7 @@ export class AuthService {
       const newUser = await this.userService.createUser({
         ...userDto,
         password: encryptedPassword,
-		created_at: new Date(),
+		    created_at: new Date(),
       });
       const { password, ...userWithoutPassword } = newUser; // password 속성을 제외한 새로운 객체 생성
     return userWithoutPassword;
