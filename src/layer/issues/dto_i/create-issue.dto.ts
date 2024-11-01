@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsDateString } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsDateString, IsOptional } from 'class-validator';
 
 export class CreateIssueDto {
   @IsString()
@@ -19,6 +19,10 @@ export class CreateIssueDto {
   @IsNumber()
   @IsNotEmpty()
   tagId!: number;
+
+  @IsDateString()
+  @IsOptional()
+  startDate?: string;
 
   @IsNumber()
   @IsNotEmpty()

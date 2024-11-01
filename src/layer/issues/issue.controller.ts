@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, Query } from '@nestjs/common';
 import { IssueService } from './issue.service';
 import { CreateIssueDto } from './dto_i/create-issue.dto';
 import { UpdateIssueDto } from './dto_i/update-issue.dto';
@@ -15,23 +15,31 @@ interface RequestWithUser {
 export class IssueController {
   constructor(private readonly issueService: IssueService) {}
 
+  // 이슈 검색 엔드포인트 추가
+  @Get('search')
+  async search(
+    @Param('projectId') projectId: number,
+    @Query('title') title?: string,
+    @Query('manager') manager?: string,
+    @Query('tagId') tagId?: string,
+  ) {
+    return this.issueService.searchIssues(projectId, {
+      title,
+      manager,
+      tagId: tagId ? +tagId : undefined,
+    });
+  }
+
   // 프로젝트의 모든 이슈 조회
   @Get()
-  async findAll(
-    @Param('projectId') projectId: string,
-    @Req() req: RequestWithUser
-  ) {
+  async findAll(@Param('projectId') projectId: number, @Req() req: RequestWithUser) {
     const userId = req.user.id;
-    return this.issueService.findAllIssues(+projectId, userId);
+    return this.issueService.findAllIssues(projectId, userId);
   }
 
   // 특정 이슈 상세 조회
   @Get('/:issueId')
-  async findOne(
-    @Param('projectId') projectId: string,
-    @Param('issueId') issueId: string,
-    @Req() req: RequestWithUser
-  ) {
+  async findOne(@Param('projectId') projectId: string, @Param('issueId') issueId: string, @Req() req: RequestWithUser) {
     const userId = req.user.id;
     return this.issueService.findOneIssue(+projectId, +issueId, userId);
   }
@@ -41,7 +49,7 @@ export class IssueController {
   async create(
     @Param('projectId') projectId: number,
     @Body() createIssueDto: CreateIssueDto,
-    @Req() req: RequestWithUser
+    @Req() req: RequestWithUser,
   ) {
     const userId = req.user.id;
     return this.issueService.createIssue(projectId, createIssueDto, userId);
@@ -53,7 +61,7 @@ export class IssueController {
     @Param('projectId') projectId: number,
     @Param('issueId') issueId: number,
     @Body() updateIssueDto: UpdateIssueDto,
-    @Req() req: RequestWithUser
+    @Req() req: RequestWithUser,
   ) {
     const userId = req.user.id;
     return this.issueService.updateIssue(projectId, issueId, updateIssueDto, userId);
@@ -65,7 +73,7 @@ export class IssueController {
     @Param('projectId') projectId: string,
     @Param('issueId') issueId: string,
     @Body() orderData: { tagId: number; order: number },
-    @Req() req: RequestWithUser
+    @Req() req: RequestWithUser,
   ) {
     const userId = req.user.id;
     return this.issueService.updateIssueOrder(+projectId, +issueId, orderData, userId);
@@ -73,11 +81,7 @@ export class IssueController {
 
   // 이슈 삭제
   @Delete('/:issueId')
-  async delete(
-    @Param('projectId') projectId: number,
-    @Param('issueId') issueId: number,
-    @Req() req: RequestWithUser
-  ) {
+  async delete(@Param('projectId') projectId: number, @Param('issueId') issueId: number, @Req() req: RequestWithUser) {
     const userId = req.user.id;
     await this.issueService.deleteIssue(projectId, issueId, userId);
     return { message: '이슈가 삭제되었습니다.' };
