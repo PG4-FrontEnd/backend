@@ -1,10 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 export class TokenResponseDto {
   @ApiProperty({
     description: '새로 발급된 액세스 토큰',
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
   })
+  @IsString()
   accessToken!: string;
 }
 
@@ -13,6 +15,7 @@ export class RefreshTokenDto {
     description: '리프레시 토큰',
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
   })
+  @IsString()
   refreshToken!: string;
 }
 

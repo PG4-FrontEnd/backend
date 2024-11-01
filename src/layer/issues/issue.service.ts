@@ -20,6 +20,7 @@ async searchIssues(
     manager?: string;
     startDate?: Date;
     tagId?: number;
+    content? : string;
   }
 ): Promise<Issue[]> {
   const queryBuilder = this.issueRepository.createQueryBuilder('issue')
@@ -35,6 +36,10 @@ async searchIssues(
 
   if (searchParams.tagId) {
     queryBuilder.andWhere('issue.tagId = :tagId', { tagId: searchParams.tagId });
+  }
+
+  if (searchParams.content) {
+    queryBuilder.andWhere('issue.content LIKE :content', { content: `%${searchParams.content}%` });
   }
 
   return await queryBuilder.orderBy('issue.order', 'ASC').getMany();
