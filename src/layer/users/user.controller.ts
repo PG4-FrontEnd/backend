@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, ParseIntPip
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { UserService } from './user.service';
 import { User } from './user.entity';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('auth')
 export class UserController {

@@ -27,8 +27,9 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = this.userRepository.create({
-      ...createUserDto,
-      password: hashedPassword,
+      email: createUserDto.email,
+      username: createUserDto.username,
+      password: hashedPassword
     });
 
     return this.userRepository.save(user);
@@ -37,7 +38,7 @@ export class UserService {
   // 모든 사용자 조회
   async findAllUser(): Promise<User[]> {
     return this.userRepository.find({
-      select: ['id', 'email', 'username', 'created_at'] // 비밀번호 제외
+      select: ['id', 'email', 'username', 'createdAt']
     });
   }
 
@@ -73,18 +74,14 @@ export class UserService {
 
   // ID로 사용자 정보 수정
   async updateUserId(id: number, updateData: UpdateUserDto): Promise<User> {
-    console.log('updateData1: ', updateData)
     const user = await this.findUserById(id);
     
     if (updateData.password) {
       updateData.password = await bcrypt.hash(updateData.password, 10);
     }
-    console.log('updateData2: ', updateData)
 
     const updatedUser = Object.assign(user, updateData);
-    console.log('updatedUser: ', updatedUser)
-    let createdUser = this.userRepository.save(updatedUser);
-    return createdUser;
+    return this.userRepository.save(updatedUser);
   }
 
   // 사용자 삭제
@@ -98,10 +95,8 @@ export class UserService {
   // 로그인 처리
   async login(email: string, password: string) {
     const user = await this.findUser(email);
-    console.log('user: ', user);
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log('isPasswordValid: ', isPasswordValid)
     
     if (!user || !isPasswordValid) {
       throw new UnauthorizedException('이메일 또는 비밀번호가 잘못되었습니다.');
@@ -153,23 +148,6 @@ export class UserService {
     }
   }
 
-  // Refresh Token으로 새 Access Token 발급
-  async refreshAccessToken(refreshToken: string): Promise<string> {
-    try {
-      const payload = await this.verifyToken(refreshToken);
-      const user = await this.findUser(payload.email);
-
-      if (!user || user.refreshToken !== refreshToken) {
-        throw new UnauthorizedException('유효하지 않은 refresh token입니다.');
-      }
-
-      return this.generateAccessToken(user);
-    } catch {
-      throw new UnauthorizedException('토큰이 만료되었습니다.');
-    }
-  }
-
-  // Private Helper Methods
   private async generateTokens(user: User) {
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
@@ -195,12 +173,6 @@ export class UserService {
         expiresIn: '28d'
       }
     );
-  }
-
-  private async verifyToken(token: string) {
-    return this.jwtService.verify(token, {
-      secret: this.configService.get<string>('JWT_SECRET')
-    });
   }
 
   private async updateRefreshToken(userId: number, refreshToken: string): Promise<void> {

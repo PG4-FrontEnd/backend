@@ -14,7 +14,7 @@ import {
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto_p/create-project.dto';
 import { UpdateProjectDto } from './dto_p/update-project.dto';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { AuthGuard } from '../../auth/auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 interface RequestWithUser {

@@ -1,31 +1,9 @@
-import { Controller, Post, Body, Res, UnauthorizedException, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Res, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto, LoginUserDto } from '../layer/users/user.dto';
+import { RefreshTokenDto, TokenResponseDto } from './jwt.dto';
 import { Response } from 'express';
-import { 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse, 
-  ApiBody,
-  ApiProperty,
-  ApiBearerAuth 
-} from '@nestjs/swagger';
-
-class RefreshTokenDto {
-  @ApiProperty({
-    description: '리프레시 토큰',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-  })
-  refreshToken!: string;
-}
-
-class TokenResponseDto {
-  @ApiProperty({
-    description: '새로 발급된 액세스 토큰',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-  })
-  accessToken!: string;
-}
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -51,10 +29,10 @@ export class AuthController {
 
   @Post('/refresh')
   @ApiOperation({ summary: '토큰 갱신' })
+  @ApiResponse({ status: 200, description: '토큰 갱신 성공', type: TokenResponseDto })
   async refreshToken(
     @Body() body: RefreshTokenDto
   ): Promise<TokenResponseDto> {
-    const accessToken = await this.authService.refreshAccessToken(body.refreshToken);
-    return { accessToken };
+    return await this.authService.refreshAccessToken(body.refreshToken);
   }
 }

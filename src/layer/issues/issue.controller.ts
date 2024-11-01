@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, Query 
 import { IssueService } from './issue.service';
 import { CreateIssueDto } from './dto_i/create-issue.dto';
 import { UpdateIssueDto } from './dto_i/update-issue.dto';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { AuthGuard } from '../../auth/auth.guard';
 
 interface RequestWithUser {
   user: {

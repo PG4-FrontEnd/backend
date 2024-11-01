@@ -12,7 +12,7 @@ export class CreateUserDto {
     @IsString()
     @IsNotEmpty()
     password!: string;
-  }
+}
 
 export class LoginUserDto {
     @IsEmail()
@@ -36,5 +36,4 @@ export class UpdateUserDto {
     @IsString()
     @IsOptional()
     refreshToken?: string;
-
 }
