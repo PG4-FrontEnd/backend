@@ -2,14 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Logge
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
-
-// JWT 페이로드 타입 정의
-interface JwtPayload {
-  id: number;
-  email: string;
-  iat?: number;
-  exp?: number;
-}
+import { JwtPayload, JwtUser } from '../auth/jwt.dto';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -79,7 +72,7 @@ export class AuthGuard implements CanActivate {
     }
   }
 
-  private extractUserFromPayload(payload: JwtPayload) {
+  private extractUserFromPayload(payload: JwtPayload): JwtUser {
     return {
       id: payload.id,
       email: payload.email,

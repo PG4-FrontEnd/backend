@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthGuard } from './common/guards/auth.guard';
+import { AuthGuard } from './auth/auth.guard';
 import { UsersModule } from './layer/users/user.module';
 import { ProjectModule } from './layer/projects/project.module';
 import { IssueModule } from './layer/issues/issue.module';

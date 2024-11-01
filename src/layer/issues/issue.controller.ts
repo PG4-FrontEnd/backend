@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, Query 
 import { IssueService } from './issue.service';
 import { CreateIssueDto } from './dto_i/create-issue.dto';
 import { UpdateIssueDto } from './dto_i/update-issue.dto';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { AuthGuard } from '../../auth/auth.guard';
 
 interface RequestWithUser {
   user: {
@@ -22,11 +22,13 @@ export class IssueController {
     @Query('title') title?: string,
     @Query('manager') manager?: string,
     @Query('tagId') tagId?: string,
+    @Query('contents') contents?: string,
   ) {
     return this.issueService.searchIssues(projectId, {
       title,
       manager,
       tagId: tagId ? +tagId : undefined,
+      contents,
     });
   }
 
