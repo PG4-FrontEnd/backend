@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Req, Res } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { UserService } from './user.service';
 import { User } from './user.entity';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { LoginGuard } from '../../common/guards/auth.guard';
+import { GoogleAuthGuard } from 'src/auth/auth.guard';
+import { Request, Response } from 'express';
 
 @Controller('auth')
 export class UserController {
@@ -22,21 +24,21 @@ export class UserController {
   async githubCallback(@Body('code') code: string) {
     return this.userService.handleGithubLogin(code);
   }
-
-  @UseGuards(AuthGuard)
+  
   @Get()
+  @UseGuards(LoginGuard)
   findAll(): Promise<User[]> {
     return this.userService.findAllUser();
   }
-
-  @UseGuards(AuthGuard)
+  
   @Get(':email')
+  @UseGuards(LoginGuard)
   findUser(@Param('email') email: string): Promise<User> {
     return this.userService.findUser(email);
   }
-
-  @UseGuards(AuthGuard)
+  
   @Put(':id')
+  @UseGuards(LoginGuard)
   updateUser(
     @Param('id') id: string,
     @Body() user: UpdateUserDto,
@@ -44,8 +46,8 @@ export class UserController {
     return this.userService.updateUser(id, user);
   }
 
-  @UseGuards(AuthGuard)
   @Delete(':id')
+  @UseGuards(LoginGuard)
   deleteUser(@Param('id') id: string): Promise<void> {
     return this.userService.deleteUser(+id);
   }

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, Query 
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto_p/create-project.dto';
 import { UpdateProjectDto } from './dto_p/update-project.dto';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { LoginGuard } from '../../common/guards/auth.guard';
 
 interface RequestWithUser {
   user: {
@@ -11,7 +11,7 @@ interface RequestWithUser {
 }
 
 @Controller('projects')
-@UseGuards(AuthGuard)
+@UseGuards(LoginGuard)
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 

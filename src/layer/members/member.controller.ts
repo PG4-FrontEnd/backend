@@ -1,9 +1,9 @@
 import { Controller, Post, Delete, Get, Param, UseGuards, Request } from '@nestjs/common';
 import { MemberService } from './member.service';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { LoginGuard } from '../../common/guards/auth.guard';
 
 @Controller('projects/:projectId/members')
-@UseGuards(AuthGuard)
+@UseGuards(LoginGuard)
 export class MemberController {
   constructor(private readonly memberService: MemberService) {}
 

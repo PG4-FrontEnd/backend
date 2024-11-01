@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from 
 import { IssueService } from './issue.service';
 import { CreateIssueDto } from './dto_i/create-issue.dto';
 import { UpdateIssueDto } from './dto_i/update-issue.dto';
-import { AuthGuard } from '../../common/guards/auth.guard';
+import { LoginGuard } from '../../common/guards/auth.guard';
 
 interface RequestWithUser {
   user: {
@@ -11,7 +11,7 @@ interface RequestWithUser {
 }
 
 @Controller('projects/:projectId/issues')
-@UseGuards(AuthGuard)
+@UseGuards(LoginGuard)
 export class IssueController {
   constructor(private readonly issueService: IssueService) {}
 
