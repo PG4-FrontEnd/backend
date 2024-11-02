@@ -14,7 +14,7 @@ import {
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto_p/create-project.dto';
 import { UpdateProjectDto } from './dto_p/update-project.dto';
-import { AuthGuard } from '../../auth/auth.guard';
+import { LoginGuard } from '../../auth/auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 interface RequestWithUser {
@@ -25,7 +25,7 @@ interface RequestWithUser {
 
 @ApiTags('projects')
 @Controller('projects')
-@UseGuards(AuthGuard)
+@UseGuards(LoginGuard)
 @ApiBearerAuth()
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}

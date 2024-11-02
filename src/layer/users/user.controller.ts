@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Req, Res, ParseIntPipe } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { UserService } from './user.service';
 import { User } from './user.entity';
-import { AuthGuard } from '../../auth/auth.guard';
+import { LoginGuard } from 'src/auth/auth.guard';
 
 @Controller('auth')
 export class UserController {
@@ -23,30 +23,30 @@ export class UserController {
   async githubCallback(@Body('code') code: string) {
     return this.userService.handleGithubLogin(code);
   }
-
-  @UseGuards(AuthGuard)
-  @Get('/users')
+  
+  @Get()
+  @UseGuards(LoginGuard)
   findAll(): Promise<User[]> {
     return this.userService.findAllUser();
   }
-
-  @UseGuards(AuthGuard)
-  @Get('/users/:email')
+  
+  @Get(':email')
+  @UseGuards(LoginGuard)
   findUser(@Param('email') email: string): Promise<User> {
     return this.userService.findUser(email);
   }
-
-  @UseGuards(AuthGuard)
-  @Put('/users/:id')
+  
+  @Put(':id')
+  @UseGuards(LoginGuard)
   updateUser(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() user: UpdateUserDto,
   ): Promise<User> {
-    return this.userService.updateUserId(id, user);
+    return this.userService.updateUser(id, user);
   }
 
-  @UseGuards(AuthGuard)
-  @Delete('/users/:id')
+  @Delete(':id')
+  @UseGuards(LoginGuard)
   deleteUser(@Param('id') id: string): Promise<void> {
     return this.userService.deleteUser(+id);
   }

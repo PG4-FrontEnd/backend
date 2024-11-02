@@ -1,6 +1,6 @@
 import { Controller, Post, Delete, Get, Param, Body, UseGuards,  Req, ParseIntPipe} from '@nestjs/common';
 import { MemberService } from './member.service';
-import { AuthGuard } from '../../auth/auth.guard';
+import { LoginGuard } from '../../auth/auth.guard';
 import { InviteMemberDto, RemoveMemberDto, UpdateMemberAuthorizationDto } from './dto_m/member.dto';
 import { ApiTags, ApiOperation, ApiParam, ApiBearerAuth, ApiResponse,ApiBody } from '@nestjs/swagger';
 
@@ -13,7 +13,7 @@ interface RequestWithUser {
 
 @ApiTags('members')
 @Controller('projects/:projectId/members')
-@UseGuards(AuthGuard)
+@UseGuards(LoginGuard)
 @ApiBearerAuth()
 export class MemberController {
   constructor(private readonly memberService: MemberService) {}
