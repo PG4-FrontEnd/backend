@@ -34,8 +34,11 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // DTO에 정의된 속성만 허용
-      forbidNonWhitelisted: true, // 허용되지 않은 속성의 요청을 차단
+      forbidNonWhitelisted: false, // 허용되지 않은 속성의 요청을 차단
       transform: true, // 요청 데이터를 DTO로 변환
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 
