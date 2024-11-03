@@ -2,9 +2,9 @@
 name: test
 
 on:
-  
   push:
-    branches: [ "fix/invite" ]
+    branches:
+      - fix/invite 
 
 jobs:
   build:
