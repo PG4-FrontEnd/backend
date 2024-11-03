@@ -13,7 +13,7 @@ env:
   #code deploy 앱 이름
   CODE_DEPLOY_APP_NAME: rynthandew
   # code deploy 배포그룹 이름
-  DEPLOYMENT_GROUP_NAME: cicdapp-deploy
+  DEPLOYMENT_GROUP_NAME: rynthandew-group
 
 jobs:
   build:
@@ -29,6 +29,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18"
+
+      - name : make .env
+        run: |
+          echo "DB_PORT=${{ secrets.DB_PORT }}" > src/.env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> src/.env
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> src/.env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> src/.env
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> src/.env
+          echo "NODE_ENV=development" >> src/.env
+          echo "JWT_SECRET=super_secret_key_123" >> src/.env
 
       # 패키지 설치 및 빌드 실행
       - name: Install and Build
