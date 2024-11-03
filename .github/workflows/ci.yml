@@ -9,11 +9,11 @@ env:
   #버킷에 저장할 폴더이름
   PROJECT_NAME: cicd_project
   #s3 이름
-  BUCKET_NAME : ryn-s3
+  BUCKET_NAME: ryn-s3
   #code deploy 앱 이름
-  CODE_DEPLOY_APP_NAME : rynthandew
+  CODE_DEPLOY_APP_NAME: rynthandew
   # code deploy 배포그룹 이름
-  DEPLOYMENT_GROUP_NAME : cicdapp-deploy
+  DEPLOYMENT_GROUP_NAME: cicdapp-deploy
 
 jobs:
   build:
@@ -35,25 +35,26 @@ jobs:
         run: |
           npm install
           npm run build
-      
+
       # 압축 파일 생성
-      - name : Make Zip File
-        run : zip -qq -r ./$GITHUB_SHA.zip .
-        shell : bash
-      
+      - name: Make Zip File
+        run: zip -qq -r ./$GITHUB_SHA.zip .
+        shell: bash
+
       # aws 인증
-      - name : Cofigure AWS credentials
-        uses : aws-actions/configure-aws-credentials@v1
-        with :
-          aws-access-key-id : ${{aws-access-key.AWS_ACCESS_KEY}} 
-          aws-secret-access-id : ${{aws-access-key.AWS_SECRET_KEY}} 
+      - name: Cofigure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY}}
+          aws-secret-access-id: ${{secrets.AWS_SECRET_KEY}}
+          aws-region: ap-northeast-2
 
       # S3에 업로드
-      - name : Upload to S3
-        run : aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
 
-      - name : Code Deploy
-       run: |
+      - name: Code Deploy
+        run: |
           aws deploy create-deployment \
             --application-name $CODE_DEPLOY_APP_NAME \
             --deployment-config-name CodeDeployDefault.OneAtATime \
