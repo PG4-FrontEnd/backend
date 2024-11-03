@@ -2,29 +2,29 @@
 
 name: test
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
+  # develop-nest로 pr이 올때
   pull_request:
     branches: [ "develop-nest" ]
     types : [closed]
 
 jobs:
   build:
+    # pr이 성공적으로 이루어졌을 때 unbuntu를 설치하고
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # 체크아웃을 한 다음
       - uses: actions/checkout@v4
 
-       # Sets up Node.js environment for NestJS
+       # node js 설치
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Adjust Node.js version if needed
+          node-version: '18'  
 
-      # Installs dependencies and builds the NestJS project
+      # npm install 과 npm build 실행
       - name: Install and Build
         run: |
           npm install
