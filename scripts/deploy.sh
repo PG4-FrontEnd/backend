@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 set -e
 
 # 기본 설정
