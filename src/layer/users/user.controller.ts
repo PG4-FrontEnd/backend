@@ -1,53 +1,63 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, ParseIntPipe } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './user.dto';
-import { UserService } from './user.service';
-import { User } from './user.entity';
-import { AuthGuard } from '../../auth/auth.guard';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  UseGuards,
+  ParseIntPipe,
+} from "@nestjs/common";
+import { CreateUserDto, UpdateUserDto } from "./user.dto";
+import { UserService } from "./user.service";
+import { User } from "./user.entity";
+import { AuthGuard } from "../../auth/auth.guard";
 
-@Controller('auth')
+@Controller("auth")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('/register')
+  @Post("/register")
   createUser(@Body() user: CreateUserDto): Promise<User> {
-    console.log('user: ', user)
+    console.log("user: ", user);
     return this.userService.createUser(user);
   }
 
-  @Post('/login')
+  @Post("/login")
   async login(@Body() loginData: { email: string; password: string }) {
     return this.userService.login(loginData.email, loginData.password);
   }
 
-  @Get('/github/callback')
-  async githubCallback(@Body('code') code: string) {
+  @Get("/github/callback")
+  async githubCallback(@Body("code") code: string) {
     return this.userService.handleGithubLogin(code);
   }
 
   @UseGuards(AuthGuard)
-  @Get('/users')
+  @Get("/users")
   findAll(): Promise<User[]> {
     return this.userService.findAllUser();
   }
 
   @UseGuards(AuthGuard)
-  @Get('/users/:email')
-  findUser(@Param('email') email: string): Promise<User> {
+  @Get("/users/:email")
+  findUser(@Param("email") email: string): Promise<User> {
     return this.userService.findUser(email);
   }
 
   @UseGuards(AuthGuard)
-  @Put('/users/:id')
+  @Put("/users/:id")
   updateUser(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() user: UpdateUserDto,
+    @Param("id", ParseIntPipe) id: number,
+    @Body() user: UpdateUserDto
   ): Promise<User> {
     return this.userService.updateUserId(id, user);
   }
 
   @UseGuards(AuthGuard)
-  @Delete('/users/:id')
-  deleteUser(@Param('id') id: string): Promise<void> {
+  @Delete("/users/:id")
+  deleteUser(@Param("id") id: string): Promise<void> {
     return this.userService.deleteUser(+id);
   }
 }
