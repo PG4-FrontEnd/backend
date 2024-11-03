@@ -1,0 +1,27 @@
+# GitHub Actions workflow
+name: test
+
+on:
+  push:
+    branches: ["fix/**"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Node.js 설치
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      # 패키지 설치 및 빌드 실행
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
