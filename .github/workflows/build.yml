@@ -1,30 +1,30 @@
-# This is a basic workflow to help you get started with Actions
-
+# GitHub Actions workflow
 name: test
 
 on:
-  # develop-nest로 pr이 올때
+  # develop-nest 브랜치로 PR이 닫힐 때 트리거
   pull_request:
     branches: [ "develop-nest" ]
-    types : [closed]
+    types: [closed]
 
 jobs:
   build:
-    # pr이 성공적으로 이루어졌을 때 unbuntu를 설치하고
+    # PR이 성공적으로 병합된 경우에만 실행
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
-    
-    steps:
-      # 체크아웃을 한 다음
-      - uses: actions/checkout@v4
 
-       # node js 설치
+    steps:
+      # 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Node.js 설치
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  
+          node-version: '18'
 
-      # npm install 과 npm build 실행
+      # 패키지 설치 및 빌드 실행
       - name: Install and Build
         run: |
           npm install
