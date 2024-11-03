@@ -15,8 +15,11 @@ export class Issue {
   @Column('text')
   contents!: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({name: 'created_at'})
   createdAt!: Date;
+
+  @Column({ type: 'datetime', nullable: true })
+  startDate!: Date;  
 
   @Column({ type: 'datetime' })
   deadline!: Date;
@@ -29,6 +32,10 @@ export class Issue {
 
   @Column()
   projectId!: number;
+
+
+  @Column({name: 'user_id'}) 
+  userId!: number;
 
   @ManyToOne(() => Project, project => project.issues)
   @JoinColumn({ name: 'projectId' })

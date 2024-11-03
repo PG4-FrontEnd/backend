@@ -2,16 +2,15 @@ import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Req, Res } 
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { UserService } from './user.service';
 import { User } from './user.entity';
-import { LoginGuard } from '../../common/guards/auth.guard';
-import { GoogleAuthGuard } from 'src/auth/auth.guard';
-import { Request, Response } from 'express';
+import { LoginGuard } from 'src/auth/auth.guard';
 
 @Controller('auth')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('/register')
-  createUser(@Body() user: User): Promise<User> {
+  createUser(@Body() user: CreateUserDto): Promise<User> {
+    console.log('user: ', user)
     return this.userService.createUser(user);
   }
 
@@ -31,11 +30,13 @@ export class UserController {
     return this.userService.findAllUser();
   }
   
+  
   @Get(':email')
   @UseGuards(LoginGuard)
   findUser(@Param('email') email: string): Promise<User> {
     return this.userService.findUser(email);
   }
+  
   
   @Put(':id')
   @UseGuards(LoginGuard)

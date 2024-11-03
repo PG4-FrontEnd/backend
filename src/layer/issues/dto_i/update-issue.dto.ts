@@ -1,30 +1,66 @@
-// src/layer/issues/dto_i/update-issue.dto.ts
-// 이슈 수정 시 필요한 데이터의 형식을 정의하는 DTO
-// 수정 가능한 필드들을 선택적으로 정의합니다.
-import { IsString, IsOptional, IsNumber, IsDateString } from 'class-validator';
+import { 
+  IsString, 
+  IsOptional, 
+  IsNumber, 
+  IsDateString, 
+  IsNotEmpty, 
+  IsArray, 
+  ValidateNested,
+  Min
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
+// 순서 업데이트를 위한 DTO
+export class UpdateOrderDto {
+  @IsNumber()
+  @IsNotEmpty()
+  issueId!: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  tagId!: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  order!: number;
+}
+
+// 배치 업데이트를 위한 DTO
+export class BatchUpdateOrderDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => UpdateOrderDto)
+  @IsNotEmpty()
+  updates!: UpdateOrderDto[];
+}
+
+// 기존 이슈 업데이트 DTO
 export class UpdateIssueDto {
   @IsString()
   @IsOptional()
-  title?: string; // 이슈 제목 (선택)
+  title?: string;
 
   @IsString()
   @IsOptional()
-  manager?: string; // 담당자 (선택)
+  manager?: string;
 
   @IsString()
   @IsOptional()
-  contents?: string; // 이슈 내용 (선택)
+  contents?: string;
 
   @IsDateString()
   @IsOptional()
-  deadline?: Date; // 마감일 (선택)
+  startDate?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  deadline?: Date;
 
   @IsNumber()
   @IsOptional()
-  tagId?: number; // 태그 ID (선택)
+  tagId?: number;
 
   @IsNumber()
   @IsOptional()
-  order?: number; // 이슈 순서 (선택)
+  order?: number;
 }

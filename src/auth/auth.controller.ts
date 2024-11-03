@@ -1,32 +1,44 @@
-import { Controller, Get, Post, Body, HttpStatus, UseGuards, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Res, Req, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Request, Response, urlencoded } from 'express'; // express의 Request와 Response 가져오기
-import { GoogleAuthGuard } from './auth.guard';
+import { CreateUserDto, LoginUserDto } from '../layer/users/user.dto';
+import { RefreshTokenDto, TokenResponseDto } from './jwt.dto';
+import { Response, Request } from 'express';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { GoogleAuthGuard } from '../login/google.guard';
 import { UserService } from 'src/layer/users/user.service';
-import { access } from 'fs';
 
-@Controller('login')
+@ApiTags('auth')
+@Controller('auth')
 export class AuthController {
   constructor(
-    private authService: AuthService,
+    private readonly authService: AuthService,
     private userService: UserService
+
   ) {}
 
-  @Get('google')
-  @UseGuards(GoogleAuthGuard)
-  async googleAuth(@Req() req: Request){}
-
-  @Get('google/callback')
-  @UseGuards(GoogleAuthGuard)
-  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    const { user } = req;
-    const token = await this.userService.getAccessToken(user)
-    console.log(token);
-
-    return res.json({
-      accessToken : token,
-      user
-    });
+  @Post('/register')
+  @ApiOperation({ summary: '회원가입' })
+  async register(@Body() createUserDto: CreateUserDto) {
+    return await this.authService.register(createUserDto);
   }
 
+  @Post('/login')
+  @ApiOperation({ summary: '로그인' })
+  async login(
+    @Body() loginDto: LoginUserDto,
+    @Res() res: Response
+  ) {
+    const jwt = await this.authService.login(loginDto.email, loginDto.password);
+    res.setHeader('Authorization', 'Bearer ' + jwt.accessToken);
+    return res.json(jwt);
+  }
+
+  @Post('/refresh')
+  @ApiOperation({ summary: '토큰 갱신' })
+  @ApiResponse({ status: 200, description: '토큰 갱신 성공', type: TokenResponseDto })
+  async refreshToken(
+    @Body() body: RefreshTokenDto
+  ): Promise<TokenResponseDto> {
+    return await this.authService.refreshAccessToken(body.refreshToken);
+  }
 }
