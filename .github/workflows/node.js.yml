@@ -3,7 +3,7 @@ name: test
 
 on:
   push:
-    branches : ["fix/invite"]
+    branches : ["main"]
      
 
 jobs:
