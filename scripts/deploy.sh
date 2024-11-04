@@ -40,7 +40,7 @@ npm run build
 # PM2 실행
 echo "> Starting application..."
 pm2 delete $APP_NAME || true
-pm2 start dist/main.js --name $APP_NAME
+pm2 start dist/main.js --name $APP_NAME --env-file src/.env
 
 pm2 list
 
