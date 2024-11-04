@@ -2,8 +2,9 @@
 name: test
 
 on:
-  push:
-    branches: ["fix/**"]
+  pull_request:
+    branches: ["develop-nest"]
+    types: [closed]
 
 env:
   #버킷에 저장할 폴더이름
@@ -16,7 +17,8 @@ env:
   DEPLOYMENT_GROUP_NAME: rynthandew-group
 
 jobs:
-  build:
+  deploy:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +32,7 @@ jobs:
         with:
           node-version: "18"
 
-      - name : make .env
+      - name: make .env
         run: |
           echo "DB_PORT=${{ secrets.DB_PORT }}" > src/.env
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> src/.env
