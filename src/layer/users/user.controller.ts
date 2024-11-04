@@ -4,7 +4,7 @@ import { UserService } from './user.service';
 import { User } from './user.entity';
 import { LoginGuard } from 'src/auth/auth.guard';
 
-@Controller('auth')
+@Controller("auth")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
