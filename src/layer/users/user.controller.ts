@@ -4,23 +4,23 @@ import { UserService } from './user.service';
 import { User } from './user.entity';
 import { LoginGuard } from 'src/auth/auth.guard';
 
-@Controller('auth')
+@Controller("auth")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('/register')
+  @Post("/register")
   createUser(@Body() user: CreateUserDto): Promise<User> {
-    console.log('user: ', user)
+    console.log("user: ", user);
     return this.userService.createUser(user);
   }
 
-  @Post('/login')
+  @Post("/login")
   async login(@Body() loginData: { email: string; password: string }) {
     return this.userService.login(loginData.email, loginData.password);
   }
 
-  @Get('/github/callback')
-  async githubCallback(@Body('code') code: string) {
+  @Get("/github/callback")
+  async githubCallback(@Body("code") code: string) {
     return this.userService.handleGithubLogin(code);
   }
   
