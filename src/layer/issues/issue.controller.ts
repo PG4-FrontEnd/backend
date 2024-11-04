@@ -1,21 +1,3 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  UseGuards,
-  Req,
-  Query,
-  ParseIntPipe,
-  BadRequestException,
-} from "@nestjs/common";
-import { IssueService } from "./issue.service";
-import { CreateIssueDto } from "./dto_i/create-issue.dto";
-import { UpdateIssueDto } from "./dto_i/update-issue.dto";
-import { AuthGuard } from "../../auth/auth.guard";
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, Query, ParseIntPipe, BadRequestException } from '@nestjs/common';
 import { IssueService } from './issue.service';
 import { CreateIssueDto } from './dto_i/create-issue.dto';
@@ -37,7 +19,6 @@ export class IssueController {
   @Put("batch-update-order")
   async updateBatchOrder(
     @Param('projectId', ParseIntPipe) projectId: number,
-    @Body() body: { updates: { issueId: number; tagId : number; order: number }[] },
     @Body() body: { updates: { issueId: number; tagId : number; order: number }[] },
     @Req() req: RequestWithUser
   ) {
