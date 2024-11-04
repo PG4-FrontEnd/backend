@@ -3,6 +3,7 @@
 # 기본 설정
 REPOSITORY=/home/ec2-user/cicd_project
 APP_NAME=cicd_project
+ECOSYSTEM_CONFIG=ecosystem.config.js
 
 cd $REPOSITORY
 
@@ -40,7 +41,7 @@ npm run build
 # PM2 실행
 echo "> Starting application..."
 pm2 delete $APP_NAME || true
-pm2 start dist/main.js --name $APP_NAME --env-file src/.env
+pm2 start $ECOSYSTEM_CONFIG
 
 pm2 list
 
