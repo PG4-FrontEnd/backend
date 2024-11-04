@@ -19,6 +19,9 @@ else
     sleep 5
 fi
 
+sudo chown -R ec2-user:ec2-user $REPOSITORY
+chmod -R 755 $REPOSITORY
+
 # node_modules 정리
 echo "> Cleaning node_modules..."
 rm -rf node_modules dist
