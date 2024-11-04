@@ -31,8 +31,8 @@ export class IssueController {
   // 배치 업데이트 - 순서를 앞으로 이동
   @Put("batch-update-order")
   async updateBatchOrder(
-    @Param("projectId", ParseIntPipe) projectId: number,
-    @Body() body: { updates: { issueId: number; order: number }[] },
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Body() body: { updates: { issueId: number; tagId : number; order: number }[] },
     @Req() req: RequestWithUser
   ) {
     if (!body || !body.updates || !Array.isArray(body.updates)) {
