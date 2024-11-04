@@ -1,6 +1,4 @@
 #!/bin/bash
-set -x
-set -e
 
 # 기본 설정
 REPOSITORY=/home/ec2-user/cicd_project
@@ -11,6 +9,7 @@ cd $REPOSITORY
 # 이전 프로세스 종료
 echo "> 프로세스 종료 시도"
 CURRENT_PID=$(pgrep -f $APP_NAME)
+echo "CURRENT_PID: $CURRENT_PID"
 
 if [ -z "$CURRENT_PID" ]; then 
     echo "> 종료할 것 없음"
@@ -37,6 +36,7 @@ npm run build
 
 # PM2 실행
 echo "> Starting application..."
+pm2 delete $APP_NAME || true
 pm2 start dist/main.js --name $APP_NAME
 
 pm2 list
