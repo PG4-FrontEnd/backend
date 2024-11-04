@@ -19,7 +19,7 @@ export class IssueController {
   @Put('batch-update-order')
   async updateBatchOrder(
     @Param('projectId', ParseIntPipe) projectId: number,
-    @Body() body: { updates: { issueId: number; order: number }[] },
+    @Body() body: { updates: { issueId: number; tagId : number; order: number }[] },
     @Req() req: RequestWithUser
   ) {
     if (!body || !body.updates || !Array.isArray(body.updates)) {
