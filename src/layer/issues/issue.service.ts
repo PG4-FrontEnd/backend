@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Issue } from './entity_i/issue.entity';
 import { CreateIssueDto } from './dto_i/create-issue.dto';
 import { UpdateIssueDto } from './dto_i/update-issue.dto';
@@ -104,6 +104,41 @@ async searchIssues(
     issue.tagId = orderData.tagId;
     issue.order = orderData.order;
     return await this.issueRepository.save(issue);
+  }
+
+  // 배치 업데이트
+  async updateBatchOrder(
+    projectId: number,
+    updates: { issueId: number; tagId: number; order: number }[],
+    userId: number
+  ): Promise<Issue[]> {
+    const issueIds = updates.map(update => update.issueId);
+    const existingIssues = await this.issueRepository.find({
+      where: { 
+        id: In(issueIds),
+        projectId 
+      }
+    });
+
+    if (existingIssues.length !== updates.length) {
+      const foundIds = existingIssues.map(issue => issue.id);
+      const missingIds = issueIds.filter(id => !foundIds.includes(id));
+      throw new BadRequestException(`일부 이슈를 찾을 수 없습니다: ${missingIds.join(', ')}`);
+    }
+
+    const updatedIssues = await Promise.all(
+      updates.map(async update => {
+        const issue = existingIssues.find(i => i.id === update.issueId);
+        if (issue) {
+          issue.tagId = update.tagId;
+          issue.order = update.order;
+          return await this.issueRepository.save(issue);
+        }
+        return null;
+      })
+    );
+
+    return updatedIssues.filter((issue): issue is Issue => issue !== null);
   }
 
   // 이슈 삭제
