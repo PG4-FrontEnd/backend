@@ -1,5 +1,5 @@
-import { IsString, IsNotEmpty, IsDateString } from 'class-validator';
-
+import { IsString, IsNotEmpty, IsISO8601 } from 'class-validator';
+import { Type } from 'class-transformer';
 export class CreateProjectDto {
   @IsString()
   @IsNotEmpty()
