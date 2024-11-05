@@ -13,7 +13,6 @@ export class CreateProjectDto {
   @IsNotEmpty()
   repository!: string;
 
-  @IsISO8601()
-  @Type(() => Date)
+  @IsString()
   deadline!: string;
 }
