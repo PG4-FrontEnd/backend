@@ -12,7 +12,11 @@ export class UpdateProjectDto {
   @IsOptional()
   leader?: string; // 프로젝트 리더 (선택)
 
-  @IsDateString()
+  @IsString()
   @IsOptional()
   deadline?: Date; // 마감일 (선택)
+
+  @IsString()
+  @IsOptional()
+  startDate?: Date;
 }
