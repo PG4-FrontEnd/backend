@@ -4,7 +4,6 @@ name: test
 on:
   push:
     branches: ["hello"]
-    types: [closed]
 
 env:
   #버킷에 저장할 폴더이름
