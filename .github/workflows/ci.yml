@@ -2,8 +2,8 @@
 name: test
 
 on:
-  pull_request:
-    branches: ["develop-nest"]
+  push:
+    branches: ["hello"]
     types: [closed]
 
 env:
