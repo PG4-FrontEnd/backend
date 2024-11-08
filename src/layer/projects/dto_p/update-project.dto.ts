@@ -14,9 +14,9 @@ export class UpdateProjectDto {
 
   @IsString()
   @IsOptional()
-  deadline?: Date; // 마감일 (선택)
+  deadline?: string; // 마감일 (선택)
 
   @IsString()
   @IsOptional()
-  startDate?: Date;
+  startDate?: string;
 }
