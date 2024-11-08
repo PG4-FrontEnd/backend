@@ -50,11 +50,11 @@ export class UpdateIssueDto {
 
   @IsDateString()
   @IsOptional()
-  startDate?: Date;
+  startDate?: string;
 
   @IsDateString()
   @IsOptional()
-  deadline?: Date;
+  deadline?: string;
 
   @IsNumber()
   @IsOptional()
