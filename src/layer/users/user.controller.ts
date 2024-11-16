@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   Res,
+  Post,
 } from "@nestjs/common";
 import { UpdateUserDto } from "./user.dto";
 import { UserService } from "./user.service";
@@ -18,7 +19,7 @@ import { LoginGuard } from "src/auth/auth.guard";
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get("/github/callback")
+  @Post("/github/callback")
   async githubCallback(@Body("code") code: string) {
     return this.userService.handleGithubLogin(code);
   }
