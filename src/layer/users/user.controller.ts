@@ -6,8 +6,6 @@ import {
   Delete,
   Put,
   UseGuards,
-  Req,
-  Res,
   Post,
 } from "@nestjs/common";
 import { UpdateUserDto } from "./user.dto";
